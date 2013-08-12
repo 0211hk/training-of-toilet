@@ -8,7 +8,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
@@ -16,6 +15,8 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
+
+import org.hk.training.toilet.preference.TimePreference;
 
 import java.util.List;
 
@@ -42,7 +43,8 @@ public class SettingsActivity extends PreferenceActivity {
         getPreferenceScreen().addPreference(fakeHeader);
         addPreferencesFromResource(R.xml.pref_notification);
 
-        bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+        bindPreferenceSummaryToValue(findPreference("notifications_ringtone"));
+        bindPreferenceSummaryToValue(findPreference("notifications_next_time"));
     }
 
     @Override
@@ -52,7 +54,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     private static boolean isXLargeTablet(Context context) {
         return (context.getResources().getConfiguration().screenLayout
-        & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
+                & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
 
     private static boolean isSimplePreferences(Context context) {
@@ -74,16 +76,7 @@ public class SettingsActivity extends PreferenceActivity {
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
 
-            if (preference instanceof ListPreference) {
-                ListPreference listPreference = (ListPreference) preference;
-                int index = listPreference.findIndexOfValue(stringValue);
-
-                preference.setSummary(
-                        index >= 0
-                                ? listPreference.getEntries()[index]
-                                : null);
-
-            } else if (preference instanceof RingtonePreference) {
+            if (preference instanceof RingtonePreference) {
                 if (TextUtils.isEmpty(stringValue)) {
                     preference.setSummary(R.string.pref_ringtone_silent);
 
@@ -97,6 +90,13 @@ public class SettingsActivity extends PreferenceActivity {
                         String name = ringtone.getTitle(preference.getContext());
                         preference.setSummary(name);
                     }
+                }
+
+            } else if (preference instanceof TimePreference) {
+                if (TextUtils.isEmpty(stringValue)) {
+                    preference.setSummary("00:00");
+                } else {
+                    preference.setSummary(stringValue);
                 }
 
             } else {
@@ -122,7 +122,8 @@ public class SettingsActivity extends PreferenceActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_notification);
 
-            bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+            bindPreferenceSummaryToValue(findPreference("notifications_ringtone"));
+            bindPreferenceSummaryToValue(findPreference("notifications_next_time"));
         }
     }
 }
